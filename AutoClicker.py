@@ -10,6 +10,7 @@ mouse = Controller()
 # Autoclicker control variables
 clicking_event = Event()  # Event to manage clicking state
 stop_event = Event()      # To stop all threads
+f6_pressed = False        # Track the F6 key state
 
 # Function to perform clicking
 def autoclick():
@@ -22,14 +23,22 @@ def autoclick():
 
 # Function to monitor keyboard inputs
 def monitor_keys():
+    global f6_pressed
     while not stop_event.is_set():
+        # Handle F6 key toggling
         if keyboard.is_pressed('F6'):
-            toggle_clicking()
-            time.sleep(0.5)  # Debounce to avoid rapid toggling
+            if not f6_pressed:
+                toggle_clicking()
+                f6_pressed = True  # Mark F6 as pressed
+        else:
+            f6_pressed = False  # Reset when F6 is released
+        
+        # Handle ESC key to exit
         if keyboard.is_pressed('esc'):
             stop_autoclicker()  # Gracefully exit if ESC is pressed
             break
-        time.sleep(0.1)
+
+        time.sleep(0.1)  # Reduce CPU usage
 
 # Function to toggle clicking state
 def toggle_clicking():
@@ -44,7 +53,6 @@ def toggle_clicking():
 
 # Function to start threads
 def start_autoclicker():
-    time.sleep(0.5)
     if not hasattr(start_autoclicker, "initialized"):
         start_autoclicker.initialized = True
         Thread(target=autoclick, daemon=True).start()
